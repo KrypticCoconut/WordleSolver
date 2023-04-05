@@ -1,6 +1,7 @@
 import time
+from contextholder import AnswerContext
 
-def algorithm(answerctx, words):
+def algorithm(answerctx: AnswerContext, words):
     possible_words = []
 
     for word in words:
@@ -11,6 +12,8 @@ def algorithm(answerctx, words):
         return possible_words[0]
     
     print("possible words: {}".format(len(possible_words)))
+    if(len(possible_words) < 5):
+        print(possible_words)
     
     time_per_words = []
     time_per_perms = []
@@ -22,7 +25,6 @@ def algorithm(answerctx, words):
         tword = time.time()
         permutations = answerctx.generate_perms(_word)
         avg_permutations.append(len(permutations))
-        
         
         for i, permutation in enumerate(permutations):
             tperm = time.time()
@@ -36,7 +38,6 @@ def algorithm(answerctx, words):
                 step = permutation[step_index]
                 if(step == 0):
                     if(alphabet in _alpabets_somewhere.keys()):
-                        # _lim = _alpabets_somewhere.get(alphabet)
                         limits[alphabet] = True
                 if(step == 1):
 
@@ -51,21 +52,20 @@ def algorithm(answerctx, words):
                     else:
                         _positions_have_to_be[alphabet] = [step_index]
                         
-            lo = {}
+            _least_occurance = {}
             
             for alphabet, _o in _alpabets_somewhere.items():
                 _oc = len(_o)
-                lo[alphabet] = [_oc, limits.get(alphabet, False)]
-                
+                _least_occurance[alphabet] = [_oc, limits.get(alphabet, False)]
+            
+                    
             
             selected = []
             for word in possible_words:
 
-                decision = answerctx.check_word_possibility(word, lo, [], _positions_have_to_be, _alpabets_somewhere, default=False)
+                decision = answerctx.check_word_possibility(word, _least_occurance, [], _positions_have_to_be, _alpabets_somewhere, default=False)
                     
                 if(decision): selected.append(word)
-
-                        
                     
             if(len(selected) > 0): # has a possibility
                 INFORMATION_GAINED = float((len(possible_words)/2)/len(selected))

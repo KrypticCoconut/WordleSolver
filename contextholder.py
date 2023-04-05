@@ -217,25 +217,33 @@ class AnswerContext:
                     permutations
                 ))
                 
-        
+        green = {}
         orange_letters = dict(zip(list(range(5)), list(word)))
         for alphabet, positions in self.positions.items(): # iterate over greens
-            
             for position in positions:
+                
+                
                 if(word[position] != alphabet): #if alphabet is not green
                     orange_letters[position] = word[position]
-                    permutations = list(filter(
+                    permutations = list(filter( # then all 2 in pos are invalid
                         lambda perm: (perm[position] == 1) or (perm[position] == 0),
                         permutations
                     ))
+                
+                
                 else: #if alphabet is green
-                    # print("deleted position {} alphabet {}".format(position, word[position]))
                     del orange_letters[position]
-                    permutations = list(filter(
+                    if(alphabet in green.keys()):
+                        green[alphabet] += 1
+                    else:
+                        green[alphabet] = 1
+                    permutations = list(filter( # then all 1 and 0s are invalid
                         lambda perm: (perm[position] == 2),
                         permutations
                     ))
         
+        
+        # orange_letters are words that have potential to be orange
         _t = {}        
         for position in range(5):
             alphabet = orange_letters.get(position, None)
@@ -245,18 +253,28 @@ class AnswerContext:
             obj = self.alphabets[alphabet]
             
             if(alphabet not in _t.keys()):
-                _t[alphabet] = [obj.no_position_not_known, obj.checked, []]
+                _t[alphabet] = [len(obj.positions) - green.get(alphabet, 0), obj.checked, []]
 
-            iter, neg, positions = _t[alphabet]
-            neg = not neg
+            iter, checked, positions = _t[alphabet]
+            
 
             
-            if((iter == 0) and (not neg)): # if # occurances in word exceeded of occurances checked 
-                permutations = list(filter(
+            if((iter == 0) and (checked)): # 0 possible oranges and checked
+                permutations = list(filter( # can only be grey
                     lambda perm: (perm[position] == 0),
                     permutations
                 ))
             else:
+                # before iter hits 0, all alphebets will enter this loop
+                # when it hits 0, they will enter this loop if and only if the alphabet is checked
+                # if it is checked tehy get stuck at the first loop or they continue to enter this loop
+                
+                if(iter > 0): # if possible oranges left
+                    permutations = list(filter(
+                        lambda perm: (perm[position] == 1),
+                        permutations
+                    ))
+                
                 iter = iter -1
                 def _f(perm):
                     for _p in positions:
@@ -269,9 +287,11 @@ class AnswerContext:
                     permutations
                 ))
                 
+                
+                
                 positions.append(position)
                 # print("deleted 2 positon {} alphabet {}".format(position, alphabet))
-            _t[alphabet] = [iter, not neg, positions]
+            _t[alphabet] = [iter, checked, positions]
             
         individuality_letters = list(set(list(word)))
         # print(individuality_letters, word)

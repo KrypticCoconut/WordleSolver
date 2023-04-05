@@ -18,15 +18,15 @@ with open("words.txt", "r") as file:
 
 def start_game(answer):
     game = Wordle()
+    ctx = AnswerContext()
     game.answer = answer
     
-    ctx = AnswerContext()
     print("answer: {}".format(answer))
     
     for guess_no in range(6):
         _start_time = time.time()
         print("-"*60)
-        print("attempt number {}".format(guess_no + 1))
+        print("attempt number {}".format(guess_no+1))
         start_time = time.time()
         
         
@@ -38,7 +38,9 @@ def start_game(answer):
             uncaclulated_scores = algorithm(ctx, words)
             
             if(isinstance(uncaclulated_scores, str)):
-                print("answer is {}".format(uncaclulated_scores))
+                print("-"*60)
+                print("answer is {}\ntries needed: {}".format(uncaclulated_scores, guess_no))
+                print(ctx.least_occurances)
                 break
             
             caclulated_scores = {}
@@ -53,6 +55,9 @@ def start_game(answer):
     
         
         if(guess == answer):
+            print("-"*60)
+            print("answer is {}\ntries needed: {}".format(guess, guess_no))
+            print(ctx.least_occurances)
             break
         
         res = game.guess(guess)
@@ -72,4 +77,4 @@ def start_game(answer):
     
     
 
-start_game("plied")
+start_game(random.choice(words))
